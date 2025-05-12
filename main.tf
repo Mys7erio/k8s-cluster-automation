@@ -2,7 +2,7 @@
 provider "oci" {}
 
 resource "oci_core_instance" "generated_oci_core_instance" {
-  for_each = var.instance_names
+  for_each = var.instances
 
 
   availability_config {
@@ -18,7 +18,7 @@ resource "oci_core_instance" "generated_oci_core_instance" {
     subnet_id                 = var.subnet_id
   }
 
-  display_name = "Red1"
+  display_name = each.key
 
   instance_options {
     are_legacy_imds_endpoints_disabled = "false"
@@ -33,8 +33,8 @@ resource "oci_core_instance" "generated_oci_core_instance" {
   shape = "VM.Standard.A1.Flex"
 
   shape_config {
-    memory_in_gbs = "6"
-    ocpus         = "1"
+    memory_in_gbs = each.value.memory_in_gbs
+    ocpus         = each.value.ocpus
   }
 
   source_details {
@@ -45,13 +45,11 @@ resource "oci_core_instance" "generated_oci_core_instance" {
 
 
 # Output the public IP addresses of the instances
-output "instance_public_ips" {
-  value = { for instance in oci_core_instance.generated_oci_core_instance : instance.key => instance.value.public_ip }
-  description = "Public IPs of the instances"
-}
-
-# Output the private IP addresses of the instances
-output "instance_private_ips" {
-  value = { for instance in oci_core_instance.generated_oci_core_instance : instance.key => instance.value.private_ip }
-  description = "Private IPs of the instances"
+output "instance_ips" {
+  value = {
+    for instance_name, instance in oci_core_instance.generated_oci_core_instance :
+    instance_name => {
+      public_ip = oci_core_instance.generated_oci_core_instance[instance_name].public_ip
+    }
+  }
 }

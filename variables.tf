@@ -25,7 +25,16 @@ variable "oci_image_source" {
 }
 
 
-variable "instance_names" {
-  description = "Unique instance names to created. This also controls the number of instances created."
-  type        = list(string)
+# variable "instance_names" {
+#   description = "Unique instance names to created. This also controls the number of instances created."
+#   type        = list(string)
+# }
+
+variable "instances" {
+  description = "The object containing instance configuration (resources)"
+  type = map(object({
+    ocpus = number
+    memory_in_gbs = number
+  }))
 }
+
