@@ -7,11 +7,12 @@ export PLATFORM=linux-arm64
 
 export KUBERNETES_VERSION=v1.33
 export CONTAINERD_VERSION=2.0.4
+export OCI_INSTANCE_ID=$OCI_INSTANCE_ID
 # ================ GLOBAL VARIABLES ================
 
 # Update and install common utilities & necessary packages
 sudo apt-get update
-sudo apt-get install -y curl wget nano vim tmux less \
+sudo apt-get install -y curl wget nano vim tmux less iputils-ping file pipx \
                         apt-transport-https ca-certificates curl gpg
 
 
@@ -34,6 +35,12 @@ sudo tee /etc/sysctl.d/k8s.conf <<EOF
 net.bridge.bridge-nf-call-iptables  = 1
 net.ipv4.ip_forward                 = 1
 net.bridge.bridge-nf-call-ip6tables = 1
+
+# Enable IPv6 and IPv6 forwarding,
+sudo tee /etc/sysctl.d/k8s.conf <<EOF
+net.ipv6.conf.lo.disable_ipv6       = 0
+net.ipv6.conf.all.disable_ipv6      = 0
+net.ipv6.conf.all.forwarding        = 1
 EOF
 
 sudo sysctl --system
@@ -72,6 +79,26 @@ echo "deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.
 sudo apt-get update
 sudo apt-get install -y kubeadm kubelet kubectl
 sudo apt-mark hold kubeadm kubelet kubectl
+
+
+function install_oci_cli {
+    sudo mkdir /opt/oci/ && sudo chown $USER:$USER /opt/oci
+    curl -s https://raw.githubusercontent.com/oracle/oci-cli/master/scripts/install/install.sh -o /tmp/install-oci-cli.sh
+    chmod +x /tmp/install-oci-cli.sh
+    /tmp/install-oci-cli.sh \
+        --install-dir /opt/oci/oracle-cli \
+        --exec-dir /opt/oci/bin \
+        --script-dir /opt/oci/oci-cli-scripts \
+        --accept-all-defaults   # This is added to choose None while specifying optional features to install
+
+    # Ensure any subsequent commands run will have OCI cli in path
+    exec -l $SHELL
+}
+
+function update_kubelet_params {
+    # Modify the kubelet parameters
+    echo "KUBELET_EXTRA_ARGS=\"--cloud-provider=external --provider-id=$OCI_INSTANCE_ID\"" | sudo tee /etc/default/kubelet
+}
 
 # Enable the kubelet service
 sudo systemctl enable --now kubelet
