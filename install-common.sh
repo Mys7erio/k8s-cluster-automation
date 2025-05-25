@@ -12,8 +12,7 @@ export OCI_INSTANCE_ID=$OCI_INSTANCE_ID
 
 # Update and install common utilities & necessary packages
 sudo apt-get update
-sudo apt-get install -y curl wget nano vim tmux less iputils-ping file pipx \
-                        apt-transport-https ca-certificates curl gpg
+sudo apt-get install -y curl wget nano vim tmux less iputils-ping file pipx apt-transport-https ca-certificates curl gpg
 
 
 # Configure firewall:
@@ -24,6 +23,10 @@ sudo apt-get install -y curl wget nano vim tmux less iputils-ping file pipx \
 sudo iptables -F
 sudo iptables -X
 sudo iptables -P INPUT ACCEPT
+
+sudo ip6tables -F
+sudo ip6tables -X
+sudo ip6tables -P INPUT ACCEPT
 
 
 # Disable SWAP
