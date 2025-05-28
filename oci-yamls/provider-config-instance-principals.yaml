@@ -1,0 +1,21 @@
+# Use this config as a template in order to  use Instance Principals based authentication
+# (https://docs.us-phoenix-1.oraclecloud.com/Content/Identity/Tasks/callingservicesfrominstances.htm).
+useInstancePrincipals: true
+
+# compartment configures Compartment within which the cluster resides.
+compartment: <your-compartment-or-tenancy-ocid>   # Name your compartment / tenancy as a good practice
+
+# vcn configures the Virtual Cloud Network (VCN) within which the cluster resides.
+vcn: <ocid-of-vcn-where-your-VMs-reside>    # Name your VCN as a comment
+
+loadBalancer:
+  subnet1: <ocid-of-subnet-within-the-above-mentioned-VCN>    # public subnet-general-vcn
+  # subnet2: Not needed, but we can add
+
+  # This enables the cloud controller manager to manage security lists / rules for inbound and outbound traffic.
+  # Choosing All, allows the CCM to configure everything for us. Also make sure that the following rule is applied
+  # to your compartment / tenancy, in order for your CCM to work properly
+  # Allow dynamic-group [your dynamic group name] to manage security-lists in compartment [your compartment name]
+  securityListManagementMode: All
+
+
