@@ -11,8 +11,9 @@ resource "oci_core_instance" "generated_oci_core_instance" {
 
   availability_domain = var.availability_domain
   compartment_id      = var.compartment_id
+
   create_vnic_details {
-    assign_ipv6ip             = "false"
+    assign_ipv6ip             = "true"
     assign_private_dns_record = "true"
     assign_public_ip          = "true"
     subnet_id                 = var.subnet_id
@@ -48,8 +49,11 @@ resource "oci_core_instance" "generated_oci_core_instance" {
 output "instance_ips" {
   value = {
     for instance_name, instance in oci_core_instance.generated_oci_core_instance :
+    
     instance_name => {
-      public_ip = oci_core_instance.generated_oci_core_instance[instance_name].public_ip
+      ipv4_public = instance.public_ip
+      ipv4_private = instance.private_ip
+      # ipv6_ip = instance.vnics[0].ipv6_ips[0]
     }
   }
 }
